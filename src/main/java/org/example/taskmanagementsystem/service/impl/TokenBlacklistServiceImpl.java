@@ -1,39 +1,29 @@
 package org.example.taskmanagementsystem.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.example.taskmanagementsystem.service.TokenBlacklistService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
 public class TokenBlacklistServiceImpl implements TokenBlacklistService {
 
-    // Используем ConcurrentHashMap для хранения токенов в памяти
-    private final ConcurrentHashMap<String, Long> tokenBlacklist = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, String> redisTemplate;
 
-    /**
-     * Добавить токен в черный список.
-     * @param token Токен, который нужно занести в черный список.
-     * @param expirationTime Время истечения токена.
-     */
     @Override
     public void addTokenToBlacklist(String token, Date expirationTime) {
-        long timeToLive = expirationTime.getTime() - System.currentTimeMillis();
-        if (timeToLive > 0) {
-            tokenBlacklist.put(token, expirationTime.getTime());
+        long timeToLiveMillis = expirationTime.getTime() - System.currentTimeMillis();
+        if (timeToLiveMillis > 0) {
+            long ttlSeconds = timeToLiveMillis / 1000;
+            redisTemplate.opsForValue().set(token, "blacklisted", ttlSeconds, TimeUnit.SECONDS);
         }
     }
-
-    /**
-     * Проверить, находится ли токен в черном списке.
-     * @param token Токен, который нужно проверить.
-     * @return True, если токен находится в черном списке.
-     */
     @Override
     public boolean isTokenBlacklisted(String token) {
-        Long expirationTime = tokenBlacklist.get(token);
-        // Если токен найден в черном списке и еще не истек его срок
-        return expirationTime != null && expirationTime > System.currentTimeMillis();
+        return Boolean.TRUE.equals(redisTemplate.hasKey(token));
     }
 }
