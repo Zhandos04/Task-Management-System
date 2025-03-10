@@ -33,7 +33,6 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неправильная почта или пароль!");
         }
         User user = userOptional.get();
-        // Аутентификация через кастомный провайдер
         customAuthenticationProvider.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), loginDTO.getPassword())
         );
