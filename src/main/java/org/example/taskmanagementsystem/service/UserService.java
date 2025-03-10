@@ -19,9 +19,7 @@ public interface UserService {
     UserDetails getCurrentUser();
     void removeExpiredUnverifiedUsers();
     void resentCode(String email);
-    AuthDTO login(LoginDTO loginDTO);
     void logout(String token);
-    AuthDTO refreshAccessToken(String refreshToken);
     void forgotPassword(String email);
     void verifyResetCode(String email, String code);
 }

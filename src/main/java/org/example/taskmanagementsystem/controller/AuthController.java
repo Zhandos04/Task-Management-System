@@ -13,8 +13,7 @@ import org.example.taskmanagementsystem.dto.request.*;
 import org.example.taskmanagementsystem.dto.response.AuthDTO;
 import org.example.taskmanagementsystem.entity.User;
 import org.example.taskmanagementsystem.exceptions.UserAlreadyExistsException;
-import org.example.taskmanagementsystem.jwt.JwtService;
-import org.example.taskmanagementsystem.service.EmailService;
+import org.example.taskmanagementsystem.service.AuthService;
 import org.example.taskmanagementsystem.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/signup")
     @Operation(
@@ -106,7 +106,7 @@ public class AuthController {
             }
     )
     public ResponseEntity<AuthDTO> login(@RequestBody LoginDTO loginDTO) {
-        AuthDTO authDTO = userService.login(loginDTO);
+        AuthDTO authDTO = authService.login(loginDTO);
         return ResponseEntity.ok(authDTO);
     }
 
@@ -147,7 +147,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         String refreshToken = headerAuth.substring(7);
-        AuthDTO authDTO = userService.refreshAccessToken(refreshToken);
+        AuthDTO authDTO = authService.refreshAccessToken(refreshToken);
         return ResponseEntity.ok(authDTO);
     }
 

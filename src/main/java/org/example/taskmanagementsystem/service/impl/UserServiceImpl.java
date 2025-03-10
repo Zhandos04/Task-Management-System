@@ -1,11 +1,8 @@
 package org.example.taskmanagementsystem.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.taskmanagementsystem.config.CustomAuthenticationProvider;
-import org.example.taskmanagementsystem.dto.request.LoginDTO;
 import org.example.taskmanagementsystem.dto.request.UpdatePasswordDTO;
 import org.example.taskmanagementsystem.dto.request.UserCreateDTO;
-import org.example.taskmanagementsystem.dto.response.AuthDTO;
 import org.example.taskmanagementsystem.entity.Role;
 import org.example.taskmanagementsystem.entity.User;
 import org.example.taskmanagementsystem.exceptions.UserAlreadyExistsException;
@@ -16,8 +13,6 @@ import org.example.taskmanagementsystem.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,7 +25,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -41,7 +35,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final EmailServiceImpl emailService;
-    private final CustomAuthenticationProvider authenticationProvider;
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
 
@@ -89,54 +82,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthDTO login(LoginDTO loginDTO) {
-        Optional<User> userOptional = getUserByEmail(loginDTO.getEmail());
-        if (userOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неправильная почта или пароль!");
-        }
-        User user = userOptional.get();
-        authenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getEmail(), loginDTO.getPassword())
-        );
-        if (!user.getIsVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Это пользователь еще не верифицирован!");
-        }
-        Map<String, String> tokens = jwtService.generateTokens(loginDTO.getEmail(), user.getRole().name());
-
-        AuthDTO authDTO = new AuthDTO();
-        authDTO.setAccessToken(tokens.get("accessToken"));
-        authDTO.setRefreshToken(tokens.get("refreshToken"));
-        authDTO.setRole(user.getRole().name());
-        return authDTO;
-    }
-
-    @Override
     public void logout(String token) {
         Date expirationTime = jwtService.extractExpiration(token);
         tokenBlacklistService.addTokenToBlacklist(token, expirationTime);
-    }
-
-    @Override
-    public AuthDTO refreshAccessToken(String refreshToken) {
-        try {
-            if (jwtService.validateRefreshToken(refreshToken)) {
-                String userName = jwtService.extractUsername(refreshToken);
-                User user = userRepository.findByEmail(userName)
-                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
-                UserDetails userDetails = loadUserByUsername(userName);
-                if (userDetails != null && !jwtService.isTokenExpired(refreshToken)) {
-                    Map<String, String> newTokens = jwtService.generateTokens(userName, user.getRole().name());
-                    AuthDTO authDTO = new AuthDTO();
-                    authDTO.setAccessToken(newTokens.get("accessToken"));
-                    authDTO.setRefreshToken(newTokens.get("refreshToken"));
-                    authDTO.setRole(user.getRole().name());
-                    return authDTO;
-                }
-            }
-            throw new BadCredentialsException("Невалидный refresh токен");
-        } catch (Exception e) {
-            throw new BadCredentialsException("Невалидный refresh токен");
-        }
     }
 
     @Override
