@@ -84,7 +84,7 @@ public class TaskController {
     @PutMapping("/edit/{id}")
     @Operation(
             summary = "Обновление задачи",
-            description = "Пользователь либо обновляет существующую задачу",
+            description = "Пользователь обновляет существующую задачу",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Задача обновлена"),
                     @ApiResponse(responseCode = "404", description = "Задача не найдена"),
@@ -106,9 +106,9 @@ public class TaskController {
                     @ApiResponse(responseCode = "403", description = "Вы не можете удалить задачу другого пользователя")
             }
     )
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Задача удалена");
     }
 
     @GetMapping("/by-user/{userId}")

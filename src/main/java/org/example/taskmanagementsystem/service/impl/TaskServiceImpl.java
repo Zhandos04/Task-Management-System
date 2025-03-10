@@ -6,10 +6,7 @@ import org.example.taskmanagementsystem.dto.request.TaskUpdateDTO;
 import org.example.taskmanagementsystem.dto.request.CommentDTO;
 import org.example.taskmanagementsystem.dto.response.CommentResponseDTO;
 import org.example.taskmanagementsystem.dto.response.TaskResponseDTO;
-import org.example.taskmanagementsystem.entity.Comment;
-import org.example.taskmanagementsystem.entity.Task;
-import org.example.taskmanagementsystem.entity.TaskStatus;
-import org.example.taskmanagementsystem.entity.User;
+import org.example.taskmanagementsystem.entity.*;
 import org.example.taskmanagementsystem.repository.CommentRepository;
 import org.example.taskmanagementsystem.repository.TaskRepository;
 import org.example.taskmanagementsystem.repository.UserRepository;
@@ -86,25 +83,7 @@ public class TaskServiceImpl implements TaskService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Вы не можете изменить задачу другого пользователя");
         }
 
-        if (taskUpdateDTO.getTitle() != null) {
-            task.setTitle(taskUpdateDTO.getTitle());
-        }
-        if (taskUpdateDTO.getDescription() != null) {
-            task.setDescription(taskUpdateDTO.getDescription());
-        }
-        if (taskUpdateDTO.getStatus() != null) {
-            task.setStatus(taskUpdateDTO.getStatus());
-        }
-        if (taskUpdateDTO.getPriority() != null) {
-            task.setPriority(taskUpdateDTO.getPriority());
-        }
-        if (taskUpdateDTO.getExecutorEmail() != null) {
-            User executor = userRepository.findByEmail(taskUpdateDTO.getExecutorEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("Исполнитель не найден."));
-            task.setExecutor(executor);
-        }
-        Task updatedTask = taskRepository.save(task);
-        return convertToDTO(updatedTask);
+        return updateAndGetTaskResponseDTO(taskUpdateDTO, task);
     }
 
     @Override
@@ -149,6 +128,57 @@ public class TaskServiceImpl implements TaskService {
         if (!user.getEmail().equals(task.getExecutor().getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Вы не можете оставлять комментарию в эту задачу");
         }
+        return addCommentAndGetCommentResponseDTO(commentDTO, task, user);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponseDTO updateTaskForAdmin(Long id, TaskUpdateDTO taskUpdateDTO) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена"));
+
+        return updateAndGetTaskResponseDTO(taskUpdateDTO, task);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTaskForAdmin(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена"));
+        taskRepository.delete(task);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponseDTO updateTaskStatusForAdmin(Long taskId, TaskStatus status) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена"));
+        task.setStatus(status);
+        Task updatedTask = taskRepository.save(task);
+        return convertToDTO(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponseDTO updateTaskPriorityForAdmin(Long taskId, TaskPriority priority) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена"));
+        task.setPriority(priority);
+        Task updatedTask = taskRepository.save(task);
+        return convertToDTO(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    public CommentResponseDTO addCommentToTaskForAdmin(Long taskId, CommentDTO commentDTO) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена"));
+        User admin = userRepository.findByEmail(userService.getCurrentUser().getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+        return addCommentAndGetCommentResponseDTO(commentDTO, task, admin);
+    }
+
+    private CommentResponseDTO addCommentAndGetCommentResponseDTO(CommentDTO commentDTO, Task task, User user) {
         Comment comment = new Comment();
         comment.setContent(commentDTO.getContent());
         comment.setAuthor(user);
@@ -158,6 +188,28 @@ public class TaskServiceImpl implements TaskService {
         CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
         commentResponseDTO.setAuthorEmail(savedComment.getAuthor().getEmail());
         return commentResponseDTO;
+    }
+
+    private TaskResponseDTO updateAndGetTaskResponseDTO(TaskUpdateDTO taskUpdateDTO, Task task) {
+        if (taskUpdateDTO.getTitle() != null) {
+            task.setTitle(taskUpdateDTO.getTitle());
+        }
+        if (taskUpdateDTO.getDescription() != null) {
+            task.setDescription(taskUpdateDTO.getDescription());
+        }
+        if (taskUpdateDTO.getStatus() != null) {
+            task.setStatus(taskUpdateDTO.getStatus());
+        }
+        if (taskUpdateDTO.getPriority() != null) {
+            task.setPriority(taskUpdateDTO.getPriority());
+        }
+        if (taskUpdateDTO.getExecutorEmail() != null) {
+            User executor = userRepository.findByEmail(taskUpdateDTO.getExecutorEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("Исполнитель не найден."));
+            task.setExecutor(executor);
+        }
+        Task updatedTask = taskRepository.save(task);
+        return convertToDTO(updatedTask);
     }
 
     private TaskResponseDTO convertToDTO(Task task) {
