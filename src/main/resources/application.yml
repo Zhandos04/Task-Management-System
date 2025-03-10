@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: TaskManagementSystem
+
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/TaskManagementSystem}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:zhandos04}
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1000MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nurbekulyzhandos@gmail.com
+    password: ovey cfsw kbvx fpnb
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+jwt:
+  secret: ${JWT_SECRET:f20be2a4a63bb8c9f2b5ecbed7f0971a96d66e30f3f7c76b56a6e0361ea8e76a}
+
+server:
+  servlet:
+    context-path: '/api/'
+  error:
+    include-message: always
+  port: ${PORT:8080}
+  address: 0.0.0.0
