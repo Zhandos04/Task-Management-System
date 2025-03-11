@@ -1,5 +1,6 @@
 package org.example.taskmanagementsystem.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.taskmanagementsystem.service.TokenBlacklistService;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,4 +27,10 @@ public class TokenBlacklistServiceImpl implements TokenBlacklistService {
     public boolean isTokenBlacklisted(String token) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(token));
     }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("Redis Host: " + redisTemplate.getConnectionFactory().getConnection().ping());
+    }
+
 }
