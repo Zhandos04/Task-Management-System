@@ -9,26 +9,18 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-
   app:
     build: .
     ports:
       - "8080:8080"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/TaskManagementSystem
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: zhandos04
       JWT_SECRET: f20be2a4a63bb8c9f2b5ecbed7f0971a96d66e30f3f7c76b56a6e0361ea8e76a
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
 
 volumes:
   db-data:
