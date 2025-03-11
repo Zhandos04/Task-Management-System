@@ -1,5 +1,6 @@
 package org.example.taskmanagementsystem.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -13,6 +14,7 @@ public class TaskCreateDTO {
     @NotNull
     private TaskPriority priority;
     @NotNull
+    @Email
     private String executorEmail;
 }
 
