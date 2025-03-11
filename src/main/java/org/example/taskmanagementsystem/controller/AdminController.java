@@ -53,7 +53,7 @@ public class AdminController {
     @PatchMapping("/{taskId}/change-status")
     @Operation(
             summary = "Обновление статуса задачи",
-            description = "Пользователь, назначенный исполнителем, изменяет статус своей задачи.",
+            description = "Администратор изменяет статус задачи.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Статус задачи успешно обновлен"),
                     @ApiResponse(responseCode = "404", description = "Задача не найдена")
@@ -66,10 +66,10 @@ public class AdminController {
     }
     @PatchMapping("/{taskId}/change-priority")
     @Operation(
-            summary = "Обновление статуса задачи",
-            description = "Пользователь, назначенный исполнителем, изменяет статус своей задачи.",
+            summary = "Обновление приоритета задачи",
+            description = "Администратор изменяет приоритета задачи",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Статус задачи успешно обновлен"),
+                    @ApiResponse(responseCode = "200", description = "Приоритет задачи успешно обновлен"),
                     @ApiResponse(responseCode = "404", description = "Задача не найдена")
             }
     )
@@ -82,10 +82,10 @@ public class AdminController {
     @PostMapping("/{taskId}/add-comment")
     @Operation(
             summary = "Добавление комментария к задаче",
-            description = "Позволяет добавить комментарий к задаче.",
+            description = "Администратор добавляет комментарий к задаче.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Комментарий добавлен"),
-                    @ApiResponse(responseCode = "404", description = "Задача или пользователь комментария не найдены")
+                    @ApiResponse(responseCode = "404", description = "Задача или администратор не найдены")
             }
     )
     public ResponseEntity<CommentResponseDTO> addComment(@PathVariable Long taskId, @RequestBody @Valid CommentDTO commentDTO) {

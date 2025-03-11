@@ -174,7 +174,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена"));
         User admin = userRepository.findByEmail(userService.getCurrentUser().getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Администратор не найден"));
         return addCommentAndGetCommentResponseDTO(commentDTO, task, admin);
     }
 

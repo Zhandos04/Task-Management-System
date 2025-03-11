@@ -113,7 +113,7 @@ public class TaskController {
 
     @GetMapping("/by-user/{userId}")
     @Operation(
-            summary = "Получение задач по автору или исполнителя",
+            summary = "Получение задач",
             description = "Возвращает задачи, созданные указанным пользователем",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список задач")
@@ -143,7 +143,7 @@ public class TaskController {
 
     @PostMapping("/{taskId}/add-comment")
     @Operation(
-            summary = "Добавление комментария к задаче",
+            summary = "Добавление комментария к задаче(Автор либо исполнитель)",
             description = "Позволяет добавить комментарий к задаче.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Комментарий добавлен"),

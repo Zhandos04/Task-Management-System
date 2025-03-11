@@ -26,14 +26,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                ex.getStatusCode().value(),
-                ex.getReason(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
