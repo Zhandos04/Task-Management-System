@@ -23,7 +23,7 @@ services:
       - db
       - redis
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/SkillIntern
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/TaskManagementSystem
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: zhandos04
       JWT_SECRET: f20be2a4a63bb8c9f2b5ecbed7f0971a96d66e30f3f7c76b56a6e0361ea8e76a
